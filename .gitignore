@@ -1,0 +1,40 @@
+# Raw / generated simulation artifacts
+*.pcap
+*.pcapng
+*.xml
+*.tr
+*.log
+results.csv
+raw-results/
+artifacts/raw/
+
+# Build artifacts
+build/
+cmake-cache/
+*.o
+*.so
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.p12
+
+# Academic raw documents / identifiers
+*.pdf
+raw-report/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

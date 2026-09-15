@@ -1,0 +1,5 @@
+distance_m,throughput_normal_mbps,throughput_interference_mbps,reported_reduction
+10,4.58,2.52,45%
+30,4.58,2.25,50.8%
+50,4.58,2.25,50.8%
+80,0.00,0.00,"100% (Loss) in report; baseline also zero"
