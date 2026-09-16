@@ -13,24 +13,43 @@
 ![Security](https://img.shields.io/badge/Focus-Interference%20%26%20DoS-b62324)
 ![Analysis](https://img.shields.io/badge/Analysis-FlowMonitor%20%7C%20Wireshark-2ea44f)
 ![Role](https://img.shields.io/badge/Role-Group%20Lead-1D4ED8)
+[![Validate retained results](https://github.com/syifaniads/ns3-wifi-jamming-throughput-analysis/actions/workflows/validate-results.yml/badge.svg)](https://github.com/syifaniads/ns3-wifi-jamming-throughput-analysis/actions/workflows/validate-results.yml)
 
 ## Overview
 
 This repository turns a 2025 wireless-network PBL report into a recruiter-friendly engineering case study. The project used **NS-3** to evaluate how **distance** and **high-rate interference traffic** affect IEEE 802.11g throughput in a controlled three-node topology consisting of an Access Point, a Station, and an interfering node.
 
-The experiment combined:
+The experiment combined fixed-rate IEEE 802.11g (`ErpOfdmRate6Mbps`), UDP application traffic, a toggleable **20 Mbps UDP broadcast interference source**, a 10/30/50/80 m distance sweep, FlowMonitor throughput collection, Bash automation, Python/Matplotlib analysis, NetAnim topology validation, and PCAP inspection in Wireshark.
 
-- fixed-rate IEEE 802.11g (`ErpOfdmRate6Mbps`),
-- UDP application traffic,
-- a toggleable **20 Mbps UDP broadcast interference source**,
-- repeated runs at **10, 30, 50, and 80 meters**,
-- FlowMonitor-based throughput collection,
-- Bash automation into CSV,
-- Python/Matplotlib visualization,
-- NetAnim topology validation, and
-- PCAP inspection with Wireshark.
+> **Terminology note:** the retained implementation shows **traffic-based UDP broadcast interference**, not a physical continuous-wave RF jammer. This portfolio uses the narrower implementation-supported interpretation.
 
-> **Terminology note:** the report sometimes uses “continuous-wave / UDP flooding jamming”. The retained implementation excerpt shows **traffic-based UDP broadcast interference**, not a physical continuous-wave RF jammer. This portfolio uses the narrower term where implementation evidence matters.
+## Real retained result data
+
+<p align="center">
+  <img src="./docs/assets/throughput-results.svg" alt="Chart generated from the retained verified NS-3 throughput dataset" width="100%" />
+</p>
+
+The chart above is built directly from [`data/verified-results.csv`](./data/verified-results.csv). No synthetic measurements were added.
+
+| Distance | Normal | Interference ON | Interpretation |
+|---|---:|---:|---|
+| 10 m | **4.58 Mbps** | **2.52 Mbps** | ~45.0% lower throughput |
+| 30 m | **4.58 Mbps** | **2.25 Mbps** | ~50.9% lower throughput |
+| 50 m | **4.58 Mbps** | **2.25 Mbps** | ~50.9% lower throughput |
+| 80 m | **0.00 Mbps** | **0.00 Mbps** | baseline connectivity already lost |
+
+At 80 m, both conditions are zero. Because the baseline has already collapsed, a jamming-specific degradation percentage is **not identifiable** there.
+
+## Senior technical review path
+
+A reviewer can inspect the engineering story from the underlying evidence:
+
+1. **Experiment topology & parameters:** [EXPERIMENT_DESIGN.md](./EXPERIMENT_DESIGN.md) and [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+2. **Interference implementation:** [JAMMING_MODEL.md](./JAMMING_MODEL.md) and [`examples/simulation-snippets.md`](./examples/simulation-snippets.md).
+3. **Automation & reproducibility:** [AUTOMATION.md](./AUTOMATION.md), [`examples/experiment-loop.sh`](./examples/experiment-loop.sh), and [docs/REPRODUCIBILITY.md](./docs/REPRODUCIBILITY.md).
+4. **Measured results:** [`data/verified-results.csv`](./data/verified-results.csv), [RESULTS.md](./RESULTS.md), and [docs/THROUGHPUT_ANALYSIS.md](./docs/THROUGHPUT_ANALYSIS.md).
+5. **Packet-level validation:** [PACKET_ANALYSIS.md](./PACKET_ANALYSIS.md) and [docs/WIRESHARK_VALIDATION.md](./docs/WIRESHARK_VALIDATION.md).
+6. **Evidence discipline:** [docs/EVIDENCE_MAP.md](./docs/EVIDENCE_MAP.md), [SOURCE_EVIDENCE.md](./SOURCE_EVIDENCE.md), [docs/REPORT_CONSISTENCY_NOTES.md](./docs/REPORT_CONSISTENCY_NOTES.md), [LIMITATIONS.md](./LIMITATIONS.md), and [AI_USAGE_DISCLOSURE.md](./AI_USAGE_DISCLOSURE.md).
 
 ## Experimental topology
 
@@ -65,78 +84,54 @@ flowchart LR
 | Metrics | tx, rx, lost, throughput |
 | Validation | FlowMonitor, NetAnim, PCAP/Wireshark |
 
-## Measured throughput
-
-| Distance | Normal | Interference ON | Difference vs normal |
-|---|---:|---:|---:|
-| 10 m | **4.58 Mbps** | **2.52 Mbps** | **−45.0%** |
-| 30 m | **4.58 Mbps** | **2.25 Mbps** | **−50.8%** (report value) |
-| 50 m | **4.58 Mbps** | **2.25 Mbps** | **−50.8%** (report value) |
-| 80 m | **0.00 Mbps** | **0.00 Mbps** | baseline connectivity already lost |
-
-The raw retained values are mirrored in [`data/verified-results.csv`](data/verified-results.csv).
-
-### What the results show
-
-At **10–50 m**, the no-interference baseline stays near `4.58 Mbps`. Enabling the high-rate broadcast source cuts throughput to `2.52 Mbps` at 10 m and `2.25 Mbps` at 30–50 m.
-
-At **80 m**, both conditions record `0 Mbps`. Because the baseline also fails, this point should be interpreted as **range/path-loss collapse in the retained experiment**, not as proof of a 100% jamming-specific degradation.
-
-These are results from this simulation configuration, not universal claims about all 802.11g networks.
-
 ## Packet-level evidence
 
-The report validates simulation behavior with PCAPs in Wireshark:
+The retained report uses PCAP/Wireshark evidence to cross-check simulation behavior:
 
-- the Station capture contains normal UDP traffic and 802.11 management traffic,
-- the AP capture shows periodic Beacon activity and application traffic,
-- the interference-node capture shows repeated UDP broadcast transmission while the interfering condition is active.
+- the Station capture contains normal UDP traffic and 802.11 management traffic;
+- the AP capture shows Beacon activity and application traffic;
+- the interference-node capture shows repeated UDP broadcast transmission while the interference condition is active.
 
-See [PACKET_ANALYSIS.md](PACKET_ANALYSIS.md) and [docs/WIRESHARK_VALIDATION.md](docs/WIRESHARK_VALIDATION.md).
+This matters because the project does not rely only on the final throughput number; it also checks what traffic was actually present in the simulated medium.
 
-## Experiment automation
+## Automated result-integrity check
 
-The project did not rely on one manually selected run. A Bash loop executes both conditions for every retained distance and appends `RESULT,...` output into a CSV dataset.
+[`scripts/validate_results.py`](./scripts/validate_results.py) runs in GitHub Actions and protects the portfolio against accidental data drift or misleading calculations. It checks that:
 
-```text
-for each distance in [10, 30, 50, 80]
-    run simulation with interference OFF
-    collect RESULT line
-    run simulation with interference ON
-    collect RESULT line
+- the distance sweep remains exactly `10, 30, 50, 80 m`;
+- the retained normal/interference values remain consistent with the evidence dataset;
+- the 10–50 m percentage reductions remain numerically consistent;
+- the 80 m row explicitly preserves the fact that the baseline is also zero.
 
-results.csv → pandas/matplotlib → throughput-vs-distance graph
-```
-
-A sanitized reconstruction is available in [`examples/experiment-loop.sh`](examples/experiment-loop.sh) and [`examples/plotting-example.py`](examples/plotting-example.py).
+This workflow validates the **retained dataset and interpretation**, not the NS-3 runtime itself. Re-running the full experiment still requires an NS-3 environment.
 
 ## Evidence levels
 
 | Claim | Evidence |
 |---|---|
 | NS-3 three-node AP/STA/interference topology | **Verified** |
-| 802.11g constant 6 Mbps configuration | **Verified from code excerpt** |
-| 20 Mbps UDP broadcast interference source | **Verified from code excerpt** |
-| ON/OFF distance sweep | **Verified from automation excerpt + results** |
+| 802.11g constant 6 Mbps configuration | **Verified from retained code excerpt** |
+| 20 Mbps UDP broadcast interference source | **Verified from retained code excerpt** |
+| ON/OFF distance sweep | **Verified from automation + results** |
 | 10/30/50/80 m throughput values | **Verified numerically** |
-| PCAP analysis in Wireshark | **Verified by report screenshots** |
-| NetAnim topology validation | **Verified by report screenshot** |
+| PCAP analysis in Wireshark | **Verified by retained report evidence** |
+| NetAnim topology validation | **Verified by retained report evidence** |
 | Physical continuous-wave RF jamming | **Not implemented by retained excerpt** |
 | Real-world wireless attack | **Not claimed** |
 | Exact Log-Distance channel configuration | **Described in report; not explicit in retained setup excerpt** |
 
 ## Engineering judgment / consistency notes
 
-A senior reviewer should be able to distinguish implementation from interpretation. The repository explicitly documents several report inconsistencies:
+A senior reviewer should be able to distinguish implementation from interpretation. This repository explicitly preserves several report inconsistencies instead of silently rewriting them:
 
-1. The report describes the AP as sending traffic to the client in one section, while the retained code excerpt installs a UDP server on the AP and a client on the STA, implying **STA → AP** application flow.
-2. The narrative mentions **continuous-wave / UDP flooding jamming**, while the implementation excerpt shows **high-rate UDP broadcast traffic**.
-3. The methodology discusses a **Log-Distance** propagation model, but the retained code excerpt only shows `YansWifiChannelHelper::Default()` and does not expose an explicit loss-model assignment.
-4. The report labels the 80 m case as `100% (Loss)`, but because both normal and interference runs are `0 Mbps`, a jamming-specific degradation percentage is not identifiable there.
+1. One report section describes AP→client traffic, while the retained code excerpt installs a UDP server on the AP and a client on the STA, implying **STA→AP** application flow.
+2. The report uses “continuous-wave / UDP flooding jamming,” while the implementation excerpt shows **high-rate UDP broadcast traffic**.
+3. The methodology discusses a **Log-Distance** propagation model, but the retained setup excerpt does not expose an explicit loss-model assignment.
+4. The 80 m result is labeled `100% (Loss)` in the report, but because both baseline and interference runs are `0 Mbps`, a jamming-specific percentage is undefined.
 
-See [docs/REPORT_CONSISTENCY_NOTES.md](docs/REPORT_CONSISTENCY_NOTES.md).
+See [docs/REPORT_CONSISTENCY_NOTES.md](./docs/REPORT_CONSISTENCY_NOTES.md).
 
-## Team
+## Team and attribution
 
 | Member | Attribution |
 |---|---|
@@ -145,28 +140,7 @@ See [docs/REPORT_CONSISTENCY_NOTES.md](docs/REPORT_CONSISTENCY_NOTES.md).
 | Kaneysha Nadetta Julief | Team Member |
 | Amanda Vania Audrey | Team Member |
 
-Member names are retained from the final report. Syifani's **Group Lead** role is documented in this portfolio based on the project owner's confirmation. Student identification numbers are intentionally omitted.
-
-This was collaborative coursework; this repository does **not** claim sole authorship of every original code fragment, capture, analysis step, or report section.
-
-## Repository guide
-
-- [Experiment design](EXPERIMENT_DESIGN.md)
-- [Interference / jamming model](JAMMING_MODEL.md)
-- [Results](RESULTS.md)
-- [Packet analysis](PACKET_ANALYSIS.md)
-- [Automation workflow](AUTOMATION.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Throughput analysis](docs/THROUGHPUT_ANALYSIS.md)
-- [Wireshark validation](docs/WIRESHARK_VALIDATION.md)
-- [Evidence map](docs/EVIDENCE_MAP.md)
-- [Reproducibility](docs/REPRODUCIBILITY.md)
-- [Report consistency notes](docs/REPORT_CONSISTENCY_NOTES.md)
-- [AI usage disclosure](AI_USAGE_DISCLOSURE.md)
-- [Team attribution](TEAM_ATTRIBUTION.md)
-- [Source evidence](SOURCE_EVIDENCE.md)
-- [Limitations](LIMITATIONS.md)
-- [Portfolio / CV copy](PORTFOLIO.md)
+Member names are retained from the final report. Student identification numbers are intentionally omitted. This was collaborative coursework; the repository does **not** claim sole authorship of every original code fragment, capture, analysis step, or report section.
 
 ## Ethical scope
 
