@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">Verified NS-3 throughput by distance and interference condition</title>
+  <desc id="desc">Line chart using data/verified-results.csv: normal 4.58,4.58,4.58,0 Mbps and interference 2.52,2.25,2.25,0 Mbps at 10,30,50,80 meters.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#07111f"/><stop offset="1" stop-color="#111827"/></linearGradient><style>.tt{font:700 34px Inter,Segoe UI,sans-serif;fill:#f8fafc}.sub{font:400 16px Inter,Segoe UI,sans-serif;fill:#94a3b8}.axis{stroke:#64748b;stroke-width:2}.grid{stroke:#334155;stroke-width:1}.lab{font:500 14px Inter,Segoe UI,sans-serif;fill:#cbd5e1}.sm{font:500 12px Inter,Segoe UI,sans-serif;fill:#94a3b8}.norm{stroke:#38bdf8;stroke-width:5;fill:none}.intf{stroke:#f59e0b;stroke-width:5;fill:none}.pn{fill:#38bdf8}.pi{fill:#f59e0b}</style></defs>
+  <rect width="1400" height="760" fill="url(#bg)"/>
+  <text x="70" y="62" class="tt">NS-3 IEEE 802.11g — Verified Throughput Results</text>
+  <text x="70" y="92" class="sub">Direct visualization of data/verified-results.csv; no synthetic measurements added</text>
+
+  <line x1="160" y1="620" x2="1220" y2="620" class="axis"/><line x1="160" y1="150" x2="160" y2="620" class="axis"/>
+  <line x1="160" y1="526" x2="1220" y2="526" class="grid"/><line x1="160" y1="432" x2="1220" y2="432" class="grid"/><line x1="160" y1="338" x2="1220" y2="338" class="grid"/><line x1="160" y1="244" x2="1220" y2="244" class="grid"/><line x1="160" y1="150" x2="1220" y2="150" class="grid"/>
+  <text x="125" y="625" class="lab">0</text><text x="125" y="531" class="lab">1</text><text x="125" y="437" class="lab">2</text><text x="125" y="343" class="lab">3</text><text x="125" y="249" class="lab">4</text><text x="125" y="155" class="lab">5</text>
+  <text x="72" y="392" class="lab" transform="rotate(-90 72 392)">Throughput (Mbps)</text>
+
+  <text x="245" y="652" class="lab">10 m</text><text x="515" y="652" class="lab">30 m</text><text x="785" y="652" class="lab">50 m</text><text x="1085" y="652" class="lab">80 m</text>
+  <text x="620" y="700" class="lab">AP–STA distance</text>
+
+  <polyline points="270,189.5 540,189.5 810,189.5 1110,620" class="norm"/>
+  <polyline points="270,383.1 540,408.5 810,408.5 1110,620" class="intf"/>
+
+  <circle cx="270" cy="189.5" r="7" class="pn"/><circle cx="540" cy="189.5" r="7" class="pn"/><circle cx="810" cy="189.5" r="7" class="pn"/><circle cx="1110" cy="620" r="7" class="pn"/>
+  <circle cx="270" cy="383.1" r="7" class="pi"/><circle cx="540" cy="408.5" r="7" class="pi"/><circle cx="810" cy="408.5" r="7" class="pi"/><circle cx="1110" cy="620" r="7" class="pi"/>
+
+  <text x="285" y="181" class="sm">4.58</text><text x="555" y="181" class="sm">4.58</text><text x="825" y="181" class="sm">4.58</text>
+  <text x="285" y="405" class="sm">2.52</text><text x="555" y="431" class="sm">2.25</text><text x="825" y="431" class="sm">2.25</text>
+  <text x="1050" y="585" class="sm">0 / 0 Mbps</text><text x="1010" y="603" class="sm">baseline already lost</text>
+
+  <line x1="870" y1="112" x2="925" y2="112" class="norm"/><text x="940" y="118" class="lab">Normal</text><line x1="1045" y1="112" x2="1100" y2="112" class="intf"/><text x="1115" y="118" class="lab">Interference ON</text>
+  <text x="70" y="735" class="sm">10–50 m: retained baseline ≈4.58 Mbps; 20 Mbps UDP broadcast interference reduces throughput. At 80 m both conditions are zero, so no jamming-specific reduction is inferable.</text>
+</svg>
